@@ -16,7 +16,6 @@ import { initWeb3 } from "@/common/helper/helper";
 import {
   CLUSTER_TYPES,
   ICreateTransaction,
-  PARTICIPATION_TYPE,
   VERIFIED_CURRENCY,
 } from "@/common/types";
 import { ONCHAIN_CONFIG } from "@/common/helper/cluster.helper";
@@ -26,6 +25,7 @@ import logger from "@/common/logger";
 import { jsonResponse } from "@/common/helper/responseMaker";
 import { calculateTimeRange } from "@/common/helper/parseRelativeTime";
 import { createTransaction } from "@/common/helper/transaction.helper";
+import { checkBalanceAndGenerateOnrampLink } from "@/common/helper/insufficient-balance.helper";
 
 // create the standard headers for this route (including CORS)
 const headers = createActionHeaders();
@@ -138,7 +138,14 @@ export const GET = async (req: Request) => {
       title: ``, // TODO: edit text here
       icon: icons.name,
       type: "action",
-      description: `- `, // TODO: edit text here
+      description: `- 
+      
+---
+
+### Need funds in your wallet?
+To add money to your wallet using **UPI**, copy your wallet address and click the link below:
+➡️ [Add Funds Here](https://game.catoff.xyz/onramp)
+`, // TODO: edit text here
       label: "Create",
       links: { actions },
     };
@@ -212,6 +219,7 @@ export const POST = async (req: Request) => {
     /////////////////////////////////////
 
     const { connection } = await initWeb3(clusterurl);
+    await checkBalanceAndGenerateOnrampLink(connection, account, wager);
 
     const recipientAddr = ONCHAIN_CONFIG[clusterurl].treasuryWallet;
     const recipientPublicKey = new PublicKey(recipientAddr);

@@ -23,6 +23,7 @@ import { jsonResponse, Promisify } from "@/common/helper/responseMaker";
 import { StatusCodes } from "http-status-codes";
 import { GenericError } from "@/common/helper/error";
 import { getTxObject, initWeb3, parseToPrecision, tokenAccounts } from "@/common/helper/helper";
+import { checkBalanceAndGenerateOnrampLink } from "@/common/helper/insufficient-balance.helper";
 
 // create the standard headers for this route (including CORS)
 const headers = createActionHeaders();
@@ -66,7 +67,14 @@ export const GET = async (req: Request) => {
       title: "Join ______________", // TODO: edit text here
       icon: iconUrl,
       type: "action",
-      description: `${______________.Name}`, // TODO: edit text here
+      description: `${______________.Name}
+      
+---
+
+### Need funds in your wallet?
+To add money to your wallet using **UPI**, copy your wallet address and click the link below:
+➡️ [Add Funds Here](https://game.catoff.xyz/onramp)
+`, // TODO: edit text here
       label: "Join",
       links: {
         actions: actions,
@@ -127,6 +135,8 @@ export const POST = async (req: Request) => {
     /////////////////////////////////////
 
     const { program, connection } = await initWeb3(clusterurl);
+    await checkBalanceAndGenerateOnrampLink(connection, account, ______________.Wager);
+
     const { escrowTokenAccount, userTokenAccount } = await tokenAccounts({
       connection,
       currency: ______________.Currency,
